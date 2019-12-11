@@ -2,6 +2,7 @@
 #define BME280_H_
 //------------------------------------------------
 #include <stdint.h>
+#include "stm32f4xx.h"
 //------------------------------------------------
 #define SEALEVELPRESSURE_HPA (1013.25)
 #define SEALEVELPRESSURE_PA (1013250)
