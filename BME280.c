@@ -3,6 +3,7 @@
 extern I2C_HandleTypeDef hi2c1;
 BME280_CalibData CalibData;
 int32_t temper_int;
+BME280_WeatherData BME280_CurrentWeatherData;
 //------------------------------------------------
 void BME280_Error(void)
 {
@@ -234,7 +235,7 @@ float BME280_ReadAltitude(float seaLevel)
   return att;
 }
 //------------------------------------------------
-void BME280_Init(void)
+int BME280_Init(void)
 {
     uint8_t value=0;
     uint32_t value32=0;
@@ -243,7 +244,7 @@ void BME280_Init(void)
 	if(value !=BME280_ID)
 	{
 		BME280_Error();
-		return;
+		return BME280_INIT_FAIL;
 	}
     
 	BME280_WriteReg(BME280_REG_SOFTRESET,BME280_SOFTRESET_VALUE);
@@ -260,5 +261,15 @@ void BME280_Init(void)
 	value32 |= BME280_ReadReg(BME280_REG_CTRL_HUM) << 8;
 	
 	BME280_SetMode(BME280_MODE_NORMAL);
+    
+    return BME280_INIT_OK;
 }
 //------------------------------------------------
+BME280_WeatherData *BME280_GetWeatherData()
+{
+    BME280_CurrentWeatherData.humidity = (int)roundf(BME280_ReadHumidity());
+    BME280_CurrentWeatherData.pressure = (int)roundf(BME280_ReadPressure() * 0.00075);
+    BME280_CurrentWeatherData.temperature = (int)roundf(BME280_ReadTemperature());
+    
+    return &BME280_CurrentWeatherData;
+}
