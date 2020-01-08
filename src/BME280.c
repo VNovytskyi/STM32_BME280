@@ -5,16 +5,24 @@ BME280_CalibData CalibData;
 int32_t temper_int;
 BME280_WeatherData BME280_CurrentWeatherData;
 //------------------------------------------------
-void BME280_Error(void)
+void BME280_Error(char *errorMessage)
 {
+    PC_Send(errorMessage);
     
+    while (1)
+    {
+        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+        HAL_Delay(100);
+    }
 }
 //------------------------------------------------
 static void I2Cx_WriteData(uint16_t Addr, uint8_t Reg, uint8_t Value)
 {
   HAL_StatusTypeDef status = HAL_OK;
   status = HAL_I2C_Mem_Write(&hi2c1, Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT, &Value, 1, 0x10000);
-  if(status != HAL_OK) BME280_Error();
+  
+    if(status != HAL_OK) 
+        BME280_Error("[ ERROR ] I2Cx_WriteData: HAL_I2C_Mem_Write\n");
 }
 //------------------------------------------------
 static uint8_t I2Cx_ReadData(uint16_t Addr, uint8_t Reg)
@@ -22,7 +30,13 @@ static uint8_t I2Cx_ReadData(uint16_t Addr, uint8_t Reg)
   HAL_StatusTypeDef status = HAL_OK;
   uint8_t value = 0;
   status = HAL_I2C_Mem_Read(&hi2c1, Addr, Reg, I2C_MEMADD_SIZE_8BIT, &value, 1, 0x10000);
-  if(status != HAL_OK) BME280_Error();
+  
+  if(status != HAL_OK) 
+  {
+      BME280_Error("[ ERROR ] I2Cx_ReadData: HAL_I2C_Mem_Read");
+      return 0;
+  }
+  
   return value;
 }
 //------------------------------------------------
@@ -30,14 +44,22 @@ static void I2Cx_ReadData16(uint16_t Addr, uint8_t Reg, uint16_t *Value)
 {
   HAL_StatusTypeDef status = HAL_OK;
   status = HAL_I2C_Mem_Read(&hi2c1, Addr, Reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)Value, 2, 0x10000);
-  if(status != HAL_OK) BME280_Error();
+  
+  if(status != HAL_OK) 
+  {
+      BME280_Error("[ ERROR ] I2Cx_ReadData16: HAL_I2C_Mem_Read");
+  }
 }
 //------------------------------------------------
 static void I2Cx_ReadData24(uint16_t Addr, uint8_t Reg, uint32_t *Value)
 {
   HAL_StatusTypeDef status = HAL_OK;
   status = HAL_I2C_Mem_Read(&hi2c1, Addr, Reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)Value, 3, 0x10000);
-  if(status != HAL_OK) BME280_Error();
+  
+  if(status != HAL_OK) 
+  {
+      BME280_Error("[ ERROR ] I2Cx_ReadData24: HAL_I2C_Mem_Read");
+  }
 }
 //------------------------------------------------
 void BME280_WriteReg(uint8_t Reg, uint8_t Value)
@@ -235,16 +257,16 @@ float BME280_ReadAltitude(float seaLevel)
   return att;
 }
 //------------------------------------------------
-int BME280_Init(void)
+void BME280_Init(void)
 {
-    uint8_t value=0;
-    uint32_t value32=0;
+    uint8_t value = 0;
+    uint32_t value32 = 0;
 	value = BME280_ReadReg(BME280_REG_ID);
 	
-	if(value !=BME280_ID)
+	if(value != BME280_ID)
 	{
-		BME280_Error();
-		return BME280_INIT_FAIL;
+		BME280_Error("[ ERROR ] BME280 Init: Invalid ID\n");
+		return;
 	}
     
 	BME280_WriteReg(BME280_REG_SOFTRESET,BME280_SOFTRESET_VALUE);
@@ -262,14 +284,16 @@ int BME280_Init(void)
 	
 	BME280_SetMode(BME280_MODE_NORMAL);
     
-    return BME280_INIT_OK;
+    BME280_CurrentWeatherData.humidity = 0;
+    BME280_CurrentWeatherData.pressure = 0;
+    BME280_CurrentWeatherData.temperature = 0;
 }
 //------------------------------------------------
 BME280_WeatherData *BME280_GetWeatherData()
 {
-    BME280_CurrentWeatherData.humidity = (int)roundf(BME280_ReadHumidity());
-    BME280_CurrentWeatherData.pressure = (int)roundf(BME280_ReadPressure() * 0.00075);
-    BME280_CurrentWeatherData.temperature = (int)roundf(BME280_ReadTemperature());
+    BME280_CurrentWeatherData.humidity = roundf(BME280_ReadHumidity());
+    BME280_CurrentWeatherData.pressure = roundf(BME280_ReadPressure() * 0.00075);
+    BME280_CurrentWeatherData.temperature = roundf(BME280_ReadTemperature());
     
     return &BME280_CurrentWeatherData;
 }

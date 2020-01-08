@@ -1,12 +1,8 @@
 #ifndef BME280_H_
 #define BME280_H_
 //------------------------------------------------
-#include "stm32f1xx.h"
-
-#include <math.h>
-//------------------------------------------------
-#define BME280_INIT_OK   1
-#define BME280_INIT_FAIL 0
+#define BME280_INIT_OK   0
+#define BME280_INIT_FAIL 1
 //------------------------------------------------
 #define SEALEVELPRESSURE_HPA (1013.25)
 #define SEALEVELPRESSURE_PA (1013250)
@@ -92,6 +88,8 @@
 #define BME280_MODE_FORCED 0x01
 #define BME280_MODE_NORMAL 0x03
 //------------------------------------------------
+#define BME280_DEBUG
+//------------------------------------------------
 typedef struct
 {
   uint16_t dig_T1;
@@ -117,17 +115,26 @@ typedef struct
 //------------------------------------------------
 typedef struct 
 {
-    int humidity;
-	int pressure;
-	int temperature;
+    float humidity;
+    float pressure;
+    float temperature;
+    
 }BME280_WeatherData;
 //------------------------------------------------
-int BME280_Init(void);
-void BME280_Error(void);
+void BME280_Init(void);
+
+void BME280_Error(char *errorMessage);
+
 float BME280_ReadTemperature(void);
+
 float BME280_ReadPressure(void);
+
 float BME280_ReadHumidity(void);
+
 float BME280_ReadAltitude(float seaLevel);
+
 BME280_WeatherData *BME280_GetWeatherData();
 //------------------------------------------------
+
+#include "BME280.c"
 #endif /* BME280_H_ */
