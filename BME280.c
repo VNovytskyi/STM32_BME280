@@ -237,11 +237,12 @@ float BME280_ReadAltitude(float seaLevel)
 //------------------------------------------------
 int BME280_Init(void)
 {
-    uint8_t value=0;
-    uint32_t value32=0;
-	value = BME280_ReadReg(BME280_REG_ID);
+	uint8_t value = 0;
+  uint32_t value32 = 0;
+
+  value = BME280_ReadReg(BME280_REG_ID);
 	
-	if(value !=BME280_ID)
+	if(value != BME280_ID)
 	{
 		BME280_Error();
 		return BME280_INIT_FAIL;
@@ -249,9 +250,9 @@ int BME280_Init(void)
     
 	BME280_WriteReg(BME280_REG_SOFTRESET,BME280_SOFTRESET_VALUE);
 	
-    while (BME280_ReadStatus() & BME280_STATUS_IM_UPDATE);
+  while (BME280_ReadStatus() & BME280_STATUS_IM_UPDATE);
 	
-    BME280_ReadCoefficients();
+  BME280_ReadCoefficients();
 	BME280_SetStandby(BME280_STBY_1000);
 	BME280_SetFilter(BME280_FILTER_4);
 	BME280_SetOversamplingTemper(BME280_OSRS_T_x4);
@@ -267,9 +268,9 @@ int BME280_Init(void)
 //------------------------------------------------
 BME280_WeatherData *BME280_GetWeatherData()
 {
-    BME280_CurrentWeatherData.humidity = (int)roundf(BME280_ReadHumidity());
-    BME280_CurrentWeatherData.pressure = (int)roundf(BME280_ReadPressure() * 0.00075);
-    BME280_CurrentWeatherData.temperature = (int)roundf(BME280_ReadTemperature());
+    BME280_CurrentWeatherData.humidity = BME280_ReadHumidity();
+    BME280_CurrentWeatherData.pressure = BME280_ReadPressure() * 0.00075;
+    BME280_CurrentWeatherData.temperature = BME280_ReadTemperature();
     
     return &BME280_CurrentWeatherData;
 }

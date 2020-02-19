@@ -117,9 +117,9 @@ typedef struct
 //------------------------------------------------
 typedef struct 
 {
-    int humidity;
-	int pressure;
-	int temperature;
+	float humidity;
+	float pressure;
+	float temperature;
 }BME280_WeatherData;
 //------------------------------------------------
 int BME280_Init(void);
@@ -130,4 +130,6 @@ float BME280_ReadHumidity(void);
 float BME280_ReadAltitude(float seaLevel);
 BME280_WeatherData *BME280_GetWeatherData();
 //------------------------------------------------
+
+#include "BME280.c"
 #endif /* BME280_H_ */
