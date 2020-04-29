@@ -244,7 +244,7 @@ int BME280_Init(void)
 	
 	if(value != BME280_ID)
 	{
-		BME280_Error();
+		//BME280_Error();
 		return BME280_INIT_FAIL;
 	}
     
